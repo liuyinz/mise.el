@@ -29,7 +29,7 @@ Heavily inspired from [envrc][envrc] which created by Purcell.
 ### dependencies
 
 - [inheirtenv](https://github.com/purcell/inheritenv)
-- [mise][mise], version >= 2.2
+- [mise][mise], version >= 2024.4.8
 - emacs, version >= 29.1
 
 ### package
