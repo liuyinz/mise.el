@@ -129,7 +129,7 @@ MSG and ARGS are as for that function."
       (when mise-mode (mise-mode -1))
       (goto-char (point-max))
       (let ((inhibit-read-only t))
-        (insert (apply 'format msg args))
+        (insert (apply #'format msg args))
         (newline)))))
 
 ;;; Functions
@@ -161,7 +161,7 @@ To ensure mise always in path.  ARGS is as same as `call-process'."
                 (if bin-path
                     (message "mise: please set experimental to true by hand.")
                   (message "mise: can't find executable.")))))
-      (apply 'call-process mise-executable args))))
+      (apply #'call-process mise-executable args))))
 
 (defun mise--detect-configs ()
   "Return a list of configs file path for mise in current directory."
