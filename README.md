@@ -38,9 +38,9 @@ Heavily inspired from [envrc][envrc] which created by Purcell.
 
 Clone and add to `load-path`, require the package.
 
-- Melpa **Not available yet**
+- Melpa
 
-~~This package is available on [MELPA]. Install with `M-x package-install` `RET` `mise` within Emacs.~~
+This package is available on [MELPA]. Install with `M-x package-install` `RET` `mise` within Emacs.
 
 ## Usage
 
