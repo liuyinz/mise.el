@@ -20,7 +20,7 @@ Heavily inspired from [envrc][envrc] which created by Purcell.
   - [Usage](#usage)
   - [Customization](#customization)
   - [Todo](#todo)
-  - [License](#license)
+  - [Donate](#donate)
 
 <!-- markdown-toc end -->
 
@@ -67,9 +67,16 @@ This package is available on [MELPA]. Install with `M-x package-install` `RET` `
 
 - [ ] support more options in `mise` cli
 
-## License
+## Donate
 
-See [LICENSE](LICENSE).
+If you think the it's helpful for you, please consider paying a cup of coffee
+for me. Thank you! :smile:
+
+<a href="https://paypal.me/liuyinz" target="_blank">
+<img
+src="https://www.paypalobjects.com/digitalassets/c/website/marketing/apac/C2/logos-buttons/optimize/44_Grey_PayPal_Pill_Button.png"
+alt="PayPal" width="120" />
+</a>
 
 [melpa]: http://melpa.org/#/git-cliff
 [mise]: https://mise.jdx.dev/
