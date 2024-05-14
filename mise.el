@@ -198,8 +198,8 @@ PAIRS is an alist obtained from mise's output.
 Values from PROCESS-ENV will be included, but their values will
 be masked by Emacs' handling of `process-environment' if they
 also appear in PAIRS."
-  (-concat (--map (-let [(key val) pair]
-                    (if val (format "%s=%s" key val) key))
+  (-concat (--map (-let [(key . val) it]
+                    (concat key (and val (concat "=" val))))
                   pairs)
            mise--process-env))
 
