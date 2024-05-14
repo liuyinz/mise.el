@@ -31,6 +31,7 @@ Heavily inspired from [envrc][envrc] which created by Purcell.
 - [inheirtenv](https://github.com/purcell/inheritenv)
 - [mise][mise], version >= 2024.4.8
 - emacs, version >= 29.1
+- [dash](https://github.com/magnars/dash.el) version >= 2.19.1
 
 ### package
 
