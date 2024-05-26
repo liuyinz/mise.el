@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.0](https://github.com/liuyinz/mise.el/compare/v0.1.0..v0.2.0) - 2024-05-26
+
+### Bug Fixes
+
+- typos in let binding - ([cb19405](https://github.com/liuyinz/mise.el/commit/cb19405eba3cfd679a5e3ac75c8c4c1146b16015))
+
+### Refactoring
+
+- add function mise--ensure to prepared mise-mode if non-nil - ([9d743e0](https://github.com/liuyinz/mise.el/commit/9d743e0c14a97fd613f39cad3a6c26ce9eb076e6))
+
 ## [0.1.0] - 2024-05-14
 
 ### Miscellaneous Chores

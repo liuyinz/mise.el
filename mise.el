@@ -3,8 +3,8 @@
 ;; Copyright (C) 2024 liuyinz
 
 ;; Author: liuyinz <liuyinz95@gmail.com>
-;; Maintainer: liuyinz <liuyinz95@gmail.com>
-;; Version: 0.1.0
+;; Maintainer: Liuyinz <liuyinz95@gmail.com>
+;; Version: 0.2.0
 ;; Package-Requires: ((emacs "29.1") (inheritenv "0.2") (dash "2.19.1"))
 ;; Keywords: tools, processes
 ;; Homepage: https://github.com/liuyinz/mise.el
