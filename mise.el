@@ -100,8 +100,6 @@ The values are as produced by `mise--export'.")
 (defvar mise--process-env nil
   "Default value of `process-envrionment'.")
 
-(defvar mise--experimental nil)
-
 (defvar-local mise-mode nil)
 
 (defvar-local mise--status 'none
@@ -137,37 +135,54 @@ MSG and ARGS are as for that function."
 (defun mise--lighter ()
   "Return a colorized version of `mise--status' for use in the mode line."
   (let ((face (pcase mise--status
-                (`none 'default)
-                (`error 'error)
-                (`global 'success)
-                (`local 'warning)))
-        (sign (substring (symbol-name mise--status) 0 1)))
-    `(" mise/" (:propertize ,sign face ,face))))
+                ('none 'default)
+                ((or 'error 'untrust) 'error)
+                ('global 'success)
+                ('local 'warning))))
+    `(" mise[" (:propertize ,(symbol-name mise--status) face ,face) "]")))
 
-(defun mise--call (&rest args)
+(defun mise--call (destination &rest args)
   "Call mise executable in global process environment.
-To ensure mise always in path.  ARGS is as same as `call-process'."
+DESTINATION says what to do with standard output, ARGS are strings passed as
+command arguments to `mise'"
   (let ((exec-path (default-value 'exec-path))
         (process-environment (default-value 'process-environment)))
-    (when (with-memoization mise--experimental
-            (if-let* ((bin-path (executable-find mise-executable))
-                      ((eq 0 (call-process
-                              mise-executable
-                              nil nil nil
-                              "settings" "set" "experimental" "true"))))
-                t
-              (prog1 nil
-                (setq-local mise--status 'error)
-                (if bin-path
-                    (message "mise: please set experimental to true by hand.")
-                  (message "mise: can't find executable.")))))
-      (apply #'call-process mise-executable args))))
+    (apply #'call-process mise-executable nil destination nil args)))
+
+(defun mise--ensure ()
+  "Return non-nil if `mise-mode' is prepared for current buffer."
+  (let ((exec-path (default-value 'exec-path))
+        (process-environment (default-value 'process-environment)))
+    (catch 'unsure
+      (if (executable-find mise-executable)
+          (let ((output1 (with-output-to-string
+                           (mise--call standard-output "settings" "get" "experimental")))
+                ;; HACK output1 cannot detect mise untrust stderr output
+                (output2 (with-output-to-string
+                           (mise--call standard-output "env"))))
+            ;; set experimental to true
+            (when (string-match-p "false" output1)
+              (if (eq 0 (mise--call nil "settings" "set" "experimental" "true"))
+                  (message "mise: set experimental to true in gloabl config.")
+                (setq mise--status 'error)
+                (message "mise: set experimental to true failed!")
+                (throw 'unsure nil)))
+            ;; trust detected config
+            (when (string-match-p "Config file is not trusted" output2)
+              (if (eq 0 (mise--call nil "trust" "--all"))
+                  (message "mise: trust detected configs.")
+                (setq-local mise--status 'untrust)
+                (message "mise: trust detected config failed!")
+                (throw 'unsure nil)))
+            t)
+        (setq mise--status 'error)
+        (message "mise: can not find executable of mise!")
+        (throw 'unsure nil)))))
 
 (defun mise--detect-configs ()
   "Return a list of configs file path for mise in current directory."
   (when-let ((output (with-output-to-string
-                       (mise--call nil standard-output nil
-                                   "config" "ls" "--verbose"))))
+                       (mise--call standard-output "config" "ls" "--verbose"))))
     (save-match-data
       (let ((pos 0)
             matches)
@@ -279,8 +294,7 @@ environment variable names and values."
     (unwind-protect
         (let ((default-directory env-dir))
           (with-temp-buffer
-            (let ((exit-code (mise--call nil (list t stderr-file)
-                                         nil "env" "--json")))
+            (let ((exit-code (mise--call (list t stderr-file) "env" "--json")))
               (mise--debug
                "
 path      : <%s>
@@ -382,7 +396,7 @@ If optional argument ALL is non-nil, update all mise-managed buffers."
   :init-value nil
   :lighter mise-lighter
   (if mise-mode
-      (progn
+      (when (mise--ensure)
         (mise--update)
         (when (and (derived-mode-p 'eshell-mode)
                    mise-update-on-eshell-directory-change)
