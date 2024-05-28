@@ -132,6 +132,11 @@ MSG and ARGS are as for that function."
 
 ;;; Functions
 
+(defun mise--message (&rest args)
+  "Display a message for `mise' operation.
+ARGS is as same as `message'."
+  (message (concat "mise: " (apply #'format args))))
+
 (defun mise--lighter ()
   "Return a colorized version of `mise--status' for use in the mode line."
   (let ((face (pcase mise--status
@@ -163,20 +168,20 @@ command arguments to `mise'"
             ;; set experimental to true
             (unless (string-match-p "true" output1)
               (if (eq 0 (mise--call nil "settings" "set" "experimental" "true"))
-                  (message "mise: set experimental to true in gloabl config.")
+                  (mise--message "set experimental to true in gloabl config")
                 (setq mise--status 'error)
-                (message "mise: set experimental to true failed!")
+                (mise--message "set experimental to true failed")
                 (throw 'unsure nil)))
             ;; trust detected config
             (when (string-match-p "Config file is not trusted" output2)
               (if (eq 0 (mise--call nil "trust" "--all"))
-                  (message "mise: trust detected configs.")
+                  (mise--message "trust detected configs.")
                 (setq-local mise--status 'untrust)
-                (message "mise: trust detected config failed!")
+                (mise--message "trust detected config failed")
                 (throw 'unsure nil)))
             t)
         (setq mise--status 'error)
-        (message "mise: can not find executable of mise!")
+        (mise--message "can not find executable of mise!")
         (throw 'unsure nil)))))
 
 (defun mise--detect-configs ()
@@ -316,7 +321,7 @@ stdout    : %s"
                     (goto-char (point-min))
                     (setq result (let ((json-key-type 'string))
                                    (json-read-object))))
-                (message "Mise failed in %s" env-dir)
+                (mise--message "failed in %s" env-dir)
                 (setq mise--status 'error)))))
       (delete-file stderr-file))
     result))
