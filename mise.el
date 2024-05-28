@@ -384,7 +384,7 @@ If optional argument ALL is non-nil, update all mise-managed buffers."
                        (--filter (with-current-buffer it
                                    (string= (mise--detect-dir) dir))
                                  (mise--managed-buffers))))))
-    (mapc #'mise--update buffers)))
+    (-each buffers #'mise--update)))
 
 
 ;;; Minor mode
