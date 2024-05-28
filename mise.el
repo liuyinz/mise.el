@@ -161,7 +161,7 @@ command arguments to `mise'"
                 (output2 (with-output-to-string
                            (mise--call standard-output "env"))))
             ;; set experimental to true
-            (when (string-match-p "false" output1)
+            (unless (string-match-p "true" output1)
               (if (eq 0 (mise--call nil "settings" "set" "experimental" "true"))
                   (message "mise: set experimental to true in gloabl config.")
                 (setq mise--status 'error)
