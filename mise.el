@@ -159,30 +159,32 @@ command arguments to `mise'"
   (let ((exec-path (default-value 'exec-path))
         (process-environment (default-value 'process-environment)))
     (catch 'unsure
-      (if (executable-find mise-executable)
-          (let ((output1 (with-output-to-string
-                           (mise--call standard-output "settings" "get" "experimental")))
-                ;; HACK output1 cannot detect mise untrust stderr output
-                (output2 (with-output-to-string
-                           (mise--call standard-output "env"))))
-            ;; set experimental to true
-            (unless (string-match-p "true" output1)
-              (if (eq 0 (mise--call nil "settings" "set" "experimental" "true"))
-                  (mise--message "set experimental to true in gloabl config")
-                (setq mise--status 'error)
-                (mise--message "set experimental to true failed")
-                (throw 'unsure nil)))
-            ;; trust detected config
-            (when (string-match-p "Config file is not trusted" output2)
-              (if (eq 0 (mise--call nil "trust" "--all"))
-                  (mise--message "trust detected configs.")
-                (setq-local mise--status 'untrust)
-                (mise--message "trust detected config failed")
-                (throw 'unsure nil)))
-            t)
-        (setq mise--status 'error)
+      (unless (file-exists-p default-directory)
+        (mise--message "parent directory %S doesn't exist, mise-mode failed" default-directory)
+        (throw 'unsure nil))
+      (unless (executable-find mise-executable)
         (mise--message "can not find executable of mise!")
-        (throw 'unsure nil)))))
+        (throw 'unsure nil))
+      (let ((output1 (with-output-to-string
+                       (mise--call standard-output "settings" "get" "experimental")))
+            ;; HACK output1 cannot detect mise untrust stderr output
+            (output2 (with-output-to-string
+                       (mise--call standard-output "env"))))
+        ;; set experimental to true
+        (unless (string-match-p "true" output1)
+          (if (eq 0 (mise--call nil "settings" "set" "experimental" "true"))
+              (mise--message "set experimental to true in gloabl config")
+            (setq mise--status 'error)
+            (mise--message "set experimental to true failed")
+            (throw 'unsure nil)))
+        ;; trust detected config
+        (when (string-match-p "Config file is not trusted" output2)
+          (if (eq 0 (mise--call nil "trust" "--all"))
+              (mise--message "trust detected configs.")
+            (setq-local mise--status 'untrust)
+            (mise--message "trust detected config failed")
+            (throw 'unsure nil)))
+        t))))
 
 (defun mise--detect-configs ()
   "Return a list of configs file path for mise in current directory."
