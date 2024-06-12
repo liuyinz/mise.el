@@ -264,33 +264,26 @@ environments updated."
               (setq-local eshell-path-env path))))
         (when (getenv "INFOPATH")
           (setq-local Info-directory-list nil)))
-      (mise--debug
-       "
-buffer      : <%s>
-call-func   : %s
-mise-status : %s
-default-env : %s
-cache-key   : %s
-cache-value : %s"
-       (propertize (buffer-name) 'face 'error)
-       "mise--update"
-       (if (eq old-status mise--status)
-           (symbol-name mise--status)
-         (concat (symbol-name old-status)
-                 " => "
-                 (symbol-name mise--status)
-                 debug-notify))
-       (if default-changed-p
-           (concat "updated" debug-notify)
-         "cached")
-       (or (and (null cache-key) "call mise--clear already")
-           (and cache-value cache-key)
-           (concat cache-key debug-notify))
-       (or (and (null cache-value) "call mise--export already")
-           (with-temp-buffer
-             (insert (json-encode-alist cache-value))
-             (json-pretty-print-buffer)
-             (buffer-string)))))))
+      (mise--debug "%-12s: <%s>\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n"
+                   "buffer" (propertize (buffer-name) 'face 'error)
+                   "call-func" "mise--update"
+                   "mise-status" (if (eq old-status mise--status)
+                                     (symbol-name mise--status)
+                                   (concat (symbol-name old-status)
+                                           " => "
+                                           (symbol-name mise--status)
+                                           debug-notify))
+                   "default-env" (if default-changed-p
+                                     (concat "updated" debug-notify)
+                                   "cached")
+                   "cache-key" (or (and (null cache-key) "call mise--clear already")
+                                   (and cache-value cache-key)
+                                   (concat cache-key debug-notify))
+                   "cache-value" (or (and (null cache-value) "call mise--export already")
+                                     (with-temp-buffer
+                                       (insert (json-encode-alist cache-value))
+                                       (json-pretty-print-buffer)
+                                       (buffer-string)))))))
 
 (defun mise--export (env-dir)
   "Export the env vars for ENV-DIR using mise.
@@ -303,20 +296,15 @@ environment variable names and values."
           (with-temp-buffer
             (let ((exit-code (mise--call (list t stderr-file) "env" "--json")))
               (mise--debug
-               "
-path      : <%s>
-call-func : %s
-run-cmd   : %s
-exit-code : %s
-stderr    : %s
-stdout    : %s"
-               (propertize env-dir 'face 'success)
-               "mise--export" "mise env --json"
-               (number-to-string exit-code)
-               (with-temp-buffer
-                 (insert-file-contents stderr-file)
-                 (buffer-string))
-               (buffer-string))
+               "%-12s: <%s>\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n"
+               "path" (propertize env-dir 'face 'success)
+               "call-func" "mise--export"
+               "run-cmd" "mise env --json"
+               "exit-code" (number-to-string exit-code)
+               "stderr" (with-temp-buffer
+                          (insert-file-contents stderr-file)
+                          (buffer-string))
+               "stdout" (buffer-string))
               (if (eq 0 exit-code)
                   (if (zerop (buffer-size))
                       (setq mise--status 'none)
