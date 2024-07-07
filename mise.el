@@ -233,7 +233,7 @@ environments updated."
     (let* ((env-dir (mise--detect-dir))
            (old-status mise--status)
            (debug-notify (propertize " new!" 'face 'warning))
-           cache-key cache-value reslt)
+           cache-key cache-value)
       (unless mise--init-env
         (setq-local mise--init-env `(:env ,process-environment
                                      :path ,exec-path)))
@@ -246,14 +246,15 @@ environments updated."
           (setq-local mise--status 'local))
         (setq cache-key (mise--cache-key env-dir))
         (setq cache-value (gethash cache-key mise--cache))
-        (setq result (or cache-value
+        (setq-local process-environment
+                    (mise--merged-env
+                     (or cache-value
                          (let ((new-val (mise--export env-dir)))
                            (--each (hash-table-keys mise--cache)
                              (and (string-prefix-p (concat env-dir "\0") it)
                                   (remhash it mise--cache)))
                            (puthash cache-key new-val mise--cache)
-                           new-val)))
-        (setq-local process-environment (mise--merged-env result))
+                           new-val))))
         (let ((path (getenv "PATH")))
           (setq-local exec-path (-map #'directory-file-name (parse-colon-path path)))
           (when (derived-mode-p 'eshell-mode)
