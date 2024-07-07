@@ -4,7 +4,7 @@
 
 ;; Author: liuyinz <liuyinz95@gmail.com>
 ;; Maintainer: Liuyinz <liuyinz95@gmail.com>
-;; Version: 0.2.0
+;; Version: 0.3.0
 ;; Package-Requires: ((emacs "29.1") (inheritenv "0.2") (dash "2.19.1"))
 ;; Keywords: tools, processes
 ;; Homepage: https://github.com/liuyinz/mise.el
