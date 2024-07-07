@@ -97,8 +97,8 @@ Messages are written into the *mise-debug* buffer."
   "Known mise env directories and their mise results.
 The values are as produced by `mise--export'.")
 
-(defvar mise--process-env nil
-  "Default value of `process-envrionment'.")
+(defvar-local mise--init-env nil
+  "Default env info of current buffer before mise enabled.")
 
 (defvar-local mise-mode nil)
 
@@ -223,7 +223,7 @@ also appear in PAIRS."
   (-concat (--map (-let [(key . val) it]
                     (concat key (and val (concat "=" val))))
                   pairs)
-           mise--process-env))
+           (plist-get mise--init-env :env)))
 
 (defun mise--update (&optional buffer)
   "Update the BUFFER or current buffer's environment if it is managed by mise.
@@ -232,13 +232,11 @@ environments updated."
   (with-current-buffer (or buffer (current-buffer))
     (let* ((env-dir (mise--detect-dir))
            (old-status mise--status)
-           (new-default (default-value 'process-environment))
-           (default-changed-p
-            (prog1 (and mise--process-env
-                        (not (equal mise--process-env new-default)))
-              (setq mise--process-env new-default)))
            (debug-notify (propertize " new!" 'face 'warning))
-           cache-key cache-value result)
+           cache-key cache-value reslt)
+      (unless mise--init-env
+        (setq-local mise--init-env `(:env ,process-environment
+                                     :path ,exec-path)))
       (if (null env-dir)
           (progn
             (setq-local mise--status 'none)
@@ -261,10 +259,8 @@ environments updated."
           (when (derived-mode-p 'eshell-mode)
             (if (fboundp 'eshell-set-path)
                 (eshell-set-path path)
-              (setq-local eshell-path-env path))))
-        (when (getenv "INFOPATH")
-          (setq-local Info-directory-list nil)))
-      (mise--debug "%-12s: <%s>\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n"
+              (setq-local eshell-path-env path)))))
+      (mise--debug "%-12s: <%s>\n%-12s: %s\n%-12s: %s\n%-12s: %s\n%-12s: %s\n"
                    "buffer" (propertize (buffer-name) 'face 'error)
                    "call-func" "mise--update"
                    "mise-status" (if (eq old-status mise--status)
@@ -273,9 +269,6 @@ environments updated."
                                            " => "
                                            (symbol-name mise--status)
                                            debug-notify))
-                   "default-env" (if default-changed-p
-                                     (concat "updated" debug-notify)
-                                   "cached")
                    "cache-key" (or (and (null cache-key) "call mise--clear already")
                                    (and cache-value cache-key)
                                    (concat cache-key debug-notify))
@@ -320,9 +313,8 @@ environment variable names and values."
   "Remove any effects of `mise-mode' for BUF.
 If BUF is nil, use current buffer instead."
   (with-current-buffer (or buf (current-buffer))
-    (kill-local-variable 'exec-path)
-    (kill-local-variable 'process-environment)
-    (kill-local-variable 'info-directory-list)
+    (setq-local process-environment (plist-get mise--init-env :env))
+    (setq-local exec-path (plist-get mise--init-env :path))
     (when (derived-mode-p 'eshell-mode)
       (if (fboundp 'eshell-set-path)
           (eshell-set-path (butlast exec-path))
@@ -391,7 +383,7 @@ If optional argument ALL is non-nil, update all mise-managed buffers."
   :init-value nil
   :lighter mise-lighter
   (if mise-mode
-      (when (mise--ensure)
+      (progn
         (mise--update)
         (when (and (derived-mode-p 'eshell-mode)
                    mise-update-on-eshell-directory-change)
@@ -404,7 +396,7 @@ If optional argument ALL is non-nil, update all mise-managed buffers."
   (unless (or (minibufferp)
               (file-remote-p default-directory)
               (funcall mise-exclude-predicate))
-    (mise-mode)))
+    (and (mise--ensure) (mise-mode))))
 
 ;;;###autoload
 (define-globalized-minor-mode global-mise-mode
