@@ -193,7 +193,7 @@ command arguments to `mise'"
     (save-match-data
       (let ((pos 0)
             matches)
-        (while (string-match "\"\\(.+\\)\"" output pos)
+        (while (string-match "mise::config config: \\(.+\\)" output pos)
           (push (match-string 1 output) matches)
           (setq pos (match-end 0)))
         (-map #'expand-file-name (reverse matches))))))
