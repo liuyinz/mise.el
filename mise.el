@@ -256,7 +256,8 @@ environments updated."
                            (puthash cache-key new-val mise--cache)
                            new-val))))
         (let ((path (getenv "PATH")))
-          (setq-local exec-path (-map #'directory-file-name (parse-colon-path path)))
+          (setq-local exec-path (-map #'directory-file-name
+                                      (remove nil (parse-colon-path path))))
           (when (derived-mode-p 'eshell-mode)
             (if (fboundp 'eshell-set-path)
                 (eshell-set-path path)
