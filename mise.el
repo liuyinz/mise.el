@@ -188,7 +188,7 @@ command arguments to `mise'"
 
 (defun mise--detect-configs ()
   "Return a list of configs file path for mise in current directory."
-  (when-let ((output (with-output-to-string
+  (when-let* ((output (with-output-to-string
                        (mise--call standard-output "config" "ls" "--verbose"))))
     (save-match-data
       (let ((pos 0)
@@ -200,7 +200,7 @@ command arguments to `mise'"
 
 (defun mise--detect-dir ()
   "Return the mise closest config located directory for the current buffer."
-  (when-let ((configs (mise--detect-configs)))
+  (when-let* ((configs (mise--detect-configs)))
     (directory-file-name (file-name-directory (car configs)))))
 
 (defun mise--cache-key (env-dir)
@@ -331,7 +331,7 @@ If BUF is nil, use current buffer instead."
 (defun mise-default-exclude ()
   "Return non-nil if current buffer should not obey `global-mise-mode'."
   (or (memq major-mode mise-exclude-modes)
-      (when-let ((lst mise-exclude-regexps))
+      (when-let* ((lst mise-exclude-regexps))
         (string-match-p (string-join (--map (concat "\\(?:" it "\\)") lst) "\\|")
                         (buffer-name)))))
 
