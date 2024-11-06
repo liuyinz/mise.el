@@ -189,14 +189,9 @@ command arguments to `mise'"
 (defun mise--detect-configs ()
   "Return a list of configs file path for mise in current directory."
   (when-let* ((output (with-output-to-string
-                       (mise--call standard-output "config" "ls" "--verbose"))))
-    (save-match-data
-      (let ((pos 0)
-            matches)
-        (while (string-match "mise::config config: \\(.+\\)" output pos)
-          (push (match-string 1 output) matches)
-          (setq pos (match-end 0)))
-        (-map #'expand-file-name (reverse matches))))))
+                        (mise--call standard-output "config" "ls" "--json")))
+              (json-object-type 'hash-table))
+    (--map (expand-file-name (gethash "path" it)) (json-read-from-string output))))
 
 (defun mise--detect-dir ()
   "Return the mise closest config located directory for the current buffer."
