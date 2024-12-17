@@ -173,7 +173,7 @@ command arguments to `mise'"
         ;; set experimental to true
         (unless (string-match-p "true" output1)
           (if (eq 0 (mise--call nil "settings" "set" "experimental" "true"))
-              (mise--message "set experimental to true in gloabl config")
+              (mise--message "set experimental to true in global config")
             (setq mise--status 'error)
             (mise--message "set experimental to true failed")
             (throw 'unsure nil)))
