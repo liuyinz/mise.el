@@ -1,6 +1,6 @@
 ;;; mise.el --- Support for `mise' cli -*- lexical-binding: t -*-
 
-;; Copyright (C) 2024 liuyinz
+;; Copyright (C) 2024-2025 liuyinz
 
 ;; Author: liuyinz <liuyinz95@gmail.com>
 ;; Maintainer: Liuyinz <liuyinz95@gmail.com>
